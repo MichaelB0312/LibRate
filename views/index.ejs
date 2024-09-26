@@ -9,30 +9,62 @@
     <% for(let item of listItems){%>
       <div class="item">
         <form action="/delete" method="post">
-          <input type="checkbox" onchange="this.form.submit()" name="deleteItemId" value="<%= item.id %>">
+          <input type="checkbox" onchange="this.form.submit()" name="deleteItemId" value="<%= item.book_id %>">
         </form>
-
-        <p id="title<%=item.id%>">
-          <%= item.title %>
-        </p>
+        <img src="https://covers.openlibrary.org/b/olid/<%=item.olid%>-M.jpg" />
+        <div class="item-details">
+          <p id="title<%=item.book_id%>">
+            <%= item.title %>
+          </p>
+          <% let date = JSON.stringify(item.read_date);
+              date = date.split('T')[0];
+           %>
+          <small>Reading Date: <%= date.split('"')[1] %> </small>
+        </div>
 
         <form class="edit" action="/edit" method="post">
-          <input type="hidden" name="updatedItemId" value="<%= item.id %>">
-          <input id="input<%=item.id%>" type="text" name="updatedItemTitle" value="<%= item.title %>" autocomplete="off"
+          <input type="hidden" name="updatedItemId" value="<%= item.book_id %>">
+          <input id="input<%=item.book_id%>" type="text" name="updatedItemTitle" value="<%= item.title %>" autocomplete="off"
             autofocus="true" hidden="true" />
-          <button id="done<%=item.id%>" class="edit" type="submit" hidden><img class="icon"
+          <button id="done<%=item.book_id%>" class="edit" type="submit" hidden><img class="icon"
               src="/assets/icons/check-solid.svg" alt="tick image"></button>
         </form>
-        <button id="edit<%=item.id%>" class="edit" onclick="handler('<%=item.id%>')"><img class="icon"
+        <button id="edit<%=item.book_id%>" class="edit" onclick="handler('<%=item.book_id%>')"><img class="icon"
             src="/assets/icons/pencil-solid.svg" alt="pencil image"></button>
       </div>
       <% } %>
 
-        <form class="item" action="/add" method="post">
-          <input type="text" name="newItem" placeholder="New Item" autocomplete="off" autofocus="true" />
-          <button class="add" type="submit" name="list" value=<%=listTitle %> >+</button>
-        </form>
   </div>
+
+  
+  <form class="item" action="/add" method="post">
+    <div class="sub-menu">
+      <div class="new-item">
+        <div class="new-item-label">
+          <label for="newItem">New Item:</label>
+        </div>
+        <div class="new-item-input">
+          <input type="text" name="newItem" autocomplete="off" autofocus placeholder="<%= locals.error ? error :  'New Item'%>" required/>
+        </div>
+      </div>
+      <div class="read-date">
+        <label for="read_date">Reading Date:</label>
+        <input type="date" name="read_date" autocomplete="off" autofocus placeholder="<%= locals.error ? error :  'Enter a Date'%>" required/>
+      </div>
+
+      <div class="rating">
+        <% for (let i=5; i>0; i--){ %>
+          <% console.log(i); %>
+          <input type="radio" name="rate" id="star<%=i%>" value="<%=i%>"><label for="star<%=i%>">&#9733;</label>
+          <%}%>
+      </div>
+
+      <div class="add-icon">
+        <button class="add" type="submit" name="list" value=<%=listTitle %> >+</button>
+      </div>
+    </div>
+  </form>
+ 
 
   <script>
     function handler(id) {
@@ -41,5 +73,26 @@
       document.getElementById("done" + id).removeAttribute("hidden")
       document.getElementById("input" + id).removeAttribute("hidden")
     }
+    
+    const ratingRadios = document.querySelectorAll('input[name="star"]');
+    let rate = 0;
+    // Add an event listener for changes to the radio buttons
+    ratingRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                rate++;
+            });
+        });
+
+    console.log("rate is: " + rate);
+    console.log("lll " + document.querySelector(".new-item-input input").attributes);
   </script>
   <%- include('partials/footer.ejs'); -%>
+
+  <!-- <div class="abook" data-rating="10" data-title="The Listening Book - by W.A. Mathieu" data-date="2021-09-03">
+    <figure><a href="/book/ListeningBook"><img src="/images/book/ListeningBook.webp" loading="lazy" alt="The Listening Book - by W.A. Mathieu"></a></figure>
+    <h2><a href="/book/ListeningBook">The Listening Book - by W.A. Mathieu</a></h2>
+    <small>Date read: 2021-09-03. How strongly I recommend it: <strong>10</strong>/10</small>
+    <p>Everyone should read this book of little essays about listening. It teaches your ears to pay more attention. It calls your attention to sounds you hadn’t noticed. It’s beautifully written, and makes your life better. I read it twice, 24 years ago, and reading it again this week, it was even better than I remembered.
+    </p><p><strong><a href="/book/ListeningBook">Read my notes</a></strong>, or go to the <a href="https://www.amazon.com/s?k=9781590308318&amp;tag=sivers-20">Amazon page</a> for details and reviews.
+    </p>
+  </div> -->
