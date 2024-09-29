@@ -27,8 +27,9 @@ let items = [
 let error_msg = '';
 
 async function load_items() {
-  const result = await db.query(
-    `SELECT book_list.book_id, book_list.title, book_details.read_date, book_details.OLID
+  let result = await db.query(
+    `SELECT book_list.book_id, book_list.title,
+       book_details.read_date, book_details.OLID, book_details.rate
       FROM book_list
       JOIN book_details
       ON book_list.book_id = book_details.id`
@@ -36,6 +37,11 @@ async function load_items() {
 
   console.log(result.rows);
   items = result.rows;
+  items.forEach(item => {
+      console.log("wowoww ");
+      console.log(item);
+      item.title = capitalize(item.title);
+  });
 }
 
 async function fetchOLM(jsonAPI, item){
@@ -47,6 +53,21 @@ async function fetchOLM(jsonAPI, item){
   } catch(error){
       console.error("Failed to make request:", error.message);
   }
+}
+
+function capitalize(item) {
+  let result = item[0].toUpperCase(); // Capitalize the first letter
+
+  for (let i = 1; i < item.length; i++) {
+      if (item[i - 1] === ' ') {
+          result += item[i].toUpperCase(); // Capitalize if the previous character is a space
+      } else {
+          result += item[i]; // Add the rest of the characters as they are
+      }
+  }
+
+  console.log(result);
+  return result;
 }
 
 app.get("/", async (req, res) => {
@@ -73,14 +94,13 @@ app.post("/add", async (req, res) => {
   error_msg = '';
   console.log(item);
   console.log(req.body);
-  // await db.query("INSERT INTO book_list (title) VALUES ($1)", [item]);
-  // await db.query("INSERT INTO book_details ")
-  //const response1 = await axios.get(API_URL + '/Any?format=txt');
-  //console.log("oldddd joke " + response1.data);
+
+  
   console.log(typeof(jsonAPI + item));
   const olm = await fetchOLM(jsonAPI, item);
   console.log(olm);
   try{
+    capitalize(item);
     await db.query(
       "INSERT INTO book_list (title) VALUES ($1)",
       [item]
@@ -93,10 +113,18 @@ app.post("/add", async (req, res) => {
     console.log(book_id.rows[0].book_id);
     console.log("id has been selected");
     try{
-      await db.query(
-        "INSERT INTO book_details (id, read_date, olid) VALUES ($1,$2,$3)",
-        [book_id.rows[0].book_id, req.body.read_date, olm]
-      );
+      if(!req.body.rate){
+        await db.query(
+          "INSERT INTO book_details (id, read_date, rate, olid) VALUES ($1,$2,$3,$4)",
+          [book_id.rows[0].book_id, req.body.read_date, 0, olm]
+        );
+      }
+      else{
+        await db.query(
+          "INSERT INTO book_details (id, read_date, rate, olid) VALUES ($1,$2,$3,$4)",
+          [book_id.rows[0].book_id, req.body.read_date, parseInt(req.body.rate, 10), olm]
+        );
+      }
       res.redirect("/");
       //TODO///////// error adding to both tries
     }catch(err){
@@ -107,6 +135,9 @@ app.post("/add", async (req, res) => {
   }catch(err){
     console.log(err);
   }
+
+  // insert rating
+
 });
 
 app.post("/edit", async (req, res) => {

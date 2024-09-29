@@ -51,24 +51,38 @@ form.edit {
 
 .item-details{
   display: block;
+  gap: 50px;
 }
 
 .rating input {
   display: none;
 }
+
+/* Style the stars */
 .rating label {
   float: right;
   font-size: 30px;
   color: lightgray;
   cursor: pointer;
 }
+
+/* When the radio button is checked, the label should turn gold */
 .rating input:checked ~ label {
   color: gold;
 }
+
+/* Hover effect: turn stars gold */
 .rating label:hover,
 .rating label:hover ~ label {
   color: gold;
 }
+
+.stars {
+  display: inline;
+  color: gold;
+  font-size: 16px;
+}
+
 input[type="checkbox"] {
   margin: 20px;
   margin-left: 0;

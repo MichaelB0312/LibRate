@@ -13,13 +13,17 @@
         </form>
         <img src="https://covers.openlibrary.org/b/olid/<%=item.olid%>-M.jpg" />
         <div class="item-details">
-          <p id="title<%=item.book_id%>">
+          <h3 id="title<%=item.book_id%>">
             <%= item.title %>
-          </p>
+          </h3>
           <% let date = JSON.stringify(item.read_date);
               date = date.split('T')[0];
            %>
           <small>Reading Date: <%= date.split('"')[1] %> </small>
+          <p> Rate: </p>
+          <% for (let i=item.rate; i>0; i--){ %>
+                  <p class="stars">&#9733;</p>
+            <%}%>
         </div>
 
         <form class="edit" action="/edit" method="post">
@@ -54,7 +58,6 @@
 
       <div class="rating">
         <% for (let i=5; i>0; i--){ %>
-          <% console.log(i); %>
           <input type="radio" name="rate" id="star<%=i%>" value="<%=i%>"><label for="star<%=i%>">&#9733;</label>
           <%}%>
       </div>
